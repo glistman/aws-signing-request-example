@@ -11,7 +11,7 @@ async fn main() {
     let aws_access_key_id = env!("AWS_ACCESS_KEY_ID");
     let aws_secret_access_key = env!("AWS_SECRET_ACCESS_KEY");
 
-    let mut canonical_request_builder = CanonicalRequestBuilder::new(
+    let canonical_request = CanonicalRequestBuilder::new(
         host,
         "POST",
         "/",
@@ -19,17 +19,15 @@ async fn main() {
         aws_secret_access_key,
         "us-east-1",
         "timestream",
-    );
-
-    let canonical_request = canonical_request_builder
-        .header("Content-Type", AWS_JSON_CONTENT_TYPE)
-        .header(X_AWZ_TARGET, "Timestream_20181101.DescribeEndpoints")
-        .body(body)
-        .build(Utc::now());
+    )
+    .header("Content-Type", AWS_JSON_CONTENT_TYPE)
+    .header(X_AWZ_TARGET, "Timestream_20181101.DescribeEndpoints")
+    .body(body)
+    .build(Utc::now());
 
     let client = reqwest::Client::new();
 
-    let enpoint = client
+    let endpoint = client
         .post(format!("https://{}", host))
         .header(X_AMZ_DATE, &canonical_request.date.iso_8601)
         .header("Content-Type", AWS_JSON_CONTENT_TYPE)
@@ -49,5 +47,5 @@ async fn main() {
         .await
         .unwrap();
 
-    println!("{:?}", enpoint);
+    println!("{:?}", endpoint);
 }
